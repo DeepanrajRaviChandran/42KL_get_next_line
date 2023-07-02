@@ -1,35 +1,42 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   get_next_line.h                                    :+:      :+:    :+:   */
+/*   get_next_line_bonus.c                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: dravi-ch <dravi-ch@student.42kl.edu.my>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/06/26 22:06:45 by dravi-ch          #+#    #+#             */
-/*   Updated: 2023/07/02 16:09:01 by dravi-ch         ###   ########.fr       */
+/*   Created: 2023/06/26 22:10:57 by dravi-ch          #+#    #+#             */
+/*   Updated: 2023/07/02 16:22:52 by dravi-ch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef GET_NEXT_LINE_H
-# define GET_NEXT_LINE_H
+#include "get_next_line_bonus.h"
 
-# include <stdlib.h>
-# include <unistd.h>
-
-# ifndef BUFFER_SIZE
-#  define BUFFER_SIZE 1024
-# endif
-
-typedef struct s_buf
+/*Reallocate memory*/
+void	*ft_realloc(void *ptr, size_t size)
 {
-	char	buf[BUFFER_SIZE];
-	int		index;
-	int		size;
-}			t_buf;
+	void	*new_ptr;
+	char	*dest;
+	char	*src;
+	size_t	i;
 
-/*Utility Function*/
-void	*ft_realloc(void *ptr, size_t size);
-
-char	*get_next_line(int fd);
-
-#endif
+	new_ptr = malloc(size);
+	if (!size || !new_ptr)
+	{
+		free (ptr);
+		return (NULL);
+	}
+	if (ptr)
+	{
+		src = (char *)ptr;
+		dest = (char *)new_ptr;
+		i = 0;
+		while (i < size)
+		{
+			dest[i] = src[i];
+			i++;
+		}
+		free(ptr);
+	}
+	return (new_ptr);
+}

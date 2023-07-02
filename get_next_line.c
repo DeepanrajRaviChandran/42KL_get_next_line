@@ -1,131 +1,80 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   get_next_line.c                                    :+:      :+:    :+:   */
+/*   get_next_line_utils.c                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: dravi-ch <dravi-ch@student.42kl.edu.my>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/06/26 22:10:57 by dravi-ch          #+#    #+#             */
-/*   Updated: 2023/06/30 19:03:20 by dravi-ch         ###   ########.fr       */
+/*   Created: 2023/06/26 22:12:13 by dravi-ch          #+#    #+#             */
+/*   Updated: 2023/07/02 16:07:07 by dravi-ch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-/*Read data from a file into a buffer.*/
-char	*read_buffer(int fd, char *buffer, int *buffer_index, int *buffer_size)
+int	read_buffer(int fd, t_buf *buf)
 {
-	if (*buffer_index >= *buffer_size)
-	{
-		*buffer_size = read(fd, buffer, BUFFER_SIZE);
-		*buffer_index = 0;
-		if (*buffer_size < 1)
-			return (NULL);
-	}
-	return (buffer);
+	buf->size = read(fd, buf->buf, BUFFER_SIZE);
+	buf->index = 0;
+	return (buf->size);
 }
 
-/*Extract a line from a character buffer.*/
-char	*extract_line(char *buffer, int *buffer_index, int buffer_size)
+int	append_line(char **line, int *line_index, char current_char)
 {
-	char	*line;
-	int		line_index;
-	char	current_char;
-	char	*temp;
+	char	*new_line;
 
-	line_index = 0;
-	line = NULL;
-	while (*buffer_index < buffer_size)
+	new_line = ft_realloc(*line, (*line_index + 1) * sizeof(char));
+	if (!new_line)
 	{
-		current_char = buffer[(*buffer_index)++];
-		if (current_char == '\n')
-			break ;
-		temp = ft_realloc(line, (line_index + 2) * sizeof(char));
-		if (!temp)
-		{
-			free (line);
-			return (NULL);
-		}
-		line = temp;
-		line[line_index++] = current_char;
-		line[line_index] = '\0';
+		free (*line);
+		return (-1);
 	}
-	return (line);
+	*line = new_line;
+	(*line)[(*line_index)++] = current_char;
+	return (0);
 }
 
-/*v = variable, buf = get buffer,
-reads data from a buffer,
-extracts a line from it,
-and handles cases where partial
-lines are read by storing the remaining buffer data in a linked list.
-*/
-char	*process_buffer(t_var *v)
+void	finalize_line(char **line, int line_index)
 {
-	char	*buf;
-	char	*line;
-	t_list	*new_node;
+	char	*new_line;
 
-	buf = read_buffer(v->fd, v->buffer, &(v->buffer_index), &(v->buffer_size));
-	if (!buf)
-		return (NULL);
-	line = extract_line(buf, &(v->buffer_index), v->buffer_size);
-	if (!line)
+	new_line = ft_realloc(*line, (line_index + 1) * sizeof(char));
+	if (!new_line)
 	{
-		ft_free_node_mem(v->start);
-		return (NULL);
+		free (*line);
+		*line = NULL;
 	}
-	if (v->buffer_index < v->buffer_size)
+	else
 	{
-		new_node = ft_lst_new_node (&(v->buffer[v->buffer_index]));
-		if (!new_node)
-		{
-			free (line);
-			ft_free_node_mem(v->start);
-			return (NULL);
-		}
-		ft_lst_append_node (&(v->start), &(v->last), new_node);
+		*line = new_line;
+		(*line)[line_index] = '\0';
 	}
-	return (line);
 }
 
-/*Check if the function is being called with a different file descriptor
-free node memory and reset buffer
-Check if there are any remaining lines in the list*/
 char	*get_next_line(int fd)
 {
-	static t_var	v = {0};
-	t_list			*temp;
+	static t_buf	buf = {.index = 0, .size = 0};
 	char			*line;
+	int				line_index;
+	char			current_char;
 
-	if (fd != v.fd)
+	line = NULL;
+	line_index = 0;
+	while (1)
 	{
-		ft_free_node_mem(v.start);
-		v.buffer_index = 0;
-		v.buffer_size = 0;
-		v.fd = fd;
+		if (buf.index >= buf.size)
+		{
+			if (read_buffer(fd, &buf) <= 0)
+				break ;
+		}
+		current_char = buf.buf[buf.index++];
+		if (append_line(&line, &line_index, current_char) != 0)
+			return (NULL);
+		if (current_char == '\n')
+			break ;
 	}
-	if (v.start)
-	{
-		temp = v.start;
-		v.start = v.start->next;
-		line = temp->line;
-		free (temp);
-		return (line);
-	}
-	return (process_buffer(&v));
+	if (line == NULL && line_index == 0)
+		return (NULL);
+	finalize_line(&line, line_index);
+	return (line);
 }
-/*
-int	main()
-{
-	int fd;
-
-	fd = open("sample.txt", O_RDWR);
-	if (fd == -1)
-	{
-	perror("Failed to open the file");
-	return (1);
-	}
-	printf("line:%s", get_next_line(fd));
-	return(0);
-}
-*/
