@@ -6,7 +6,7 @@
 /*   By: dravi-ch <dravi-ch@student.42kl.edu.my>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/26 22:06:45 by dravi-ch          #+#    #+#             */
-/*   Updated: 2023/07/02 16:46:11 by dravi-ch         ###   ########.fr       */
+/*   Updated: 2023/07/04 07:43:47 by dravi-ch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,14 +19,16 @@
 # ifndef BUFFER_SIZE
 #  define BUFFER_SIZE 1024
 # endif
-/*
+
+# define MAX_FD 1024
+
 typedef struct s_buf
 {
+	int		fd;
 	char	buf[BUFFER_SIZE];
 	int		index;
 	int		size;
 }			t_buf;
-*/
 
 /*Utility Function*/
 void	*ft_realloc(void *ptr, size_t size);

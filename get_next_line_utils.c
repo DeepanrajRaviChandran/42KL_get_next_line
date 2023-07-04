@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   get_next_line.c                                    :+:      :+:    :+:   */
+/*   get_next_line_utils.c                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: dravi-ch <dravi-ch@student.42kl.edu.my>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/26 22:10:57 by dravi-ch          #+#    #+#             */
-/*   Updated: 2023/07/02 12:46:21 by dravi-ch         ###   ########.fr       */
+/*   Updated: 2023/07/04 10:25:50 by dravi-ch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ void	*ft_realloc(void *ptr, size_t size)
 	char	*src;
 	size_t	i;
 
-	new_ptr = malloc(size);
+	new_ptr = (char *)malloc(size + 1);
 	if (!size || !new_ptr)
 	{
 		free (ptr);

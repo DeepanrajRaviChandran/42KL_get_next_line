@@ -49,5 +49,7 @@
 **count: The maximum number of bytes to read.
 **returns the number of bytes read if successful, 0 if the end of the file has been reached, or -1 if an error occurred. The actual data read is stored in the buffer parameter.
 
-## Pseudocode
-1. Use Linked list which iterates through the file to create multiple node which has the consecutive lines in the file.
+## Idea
+**From the buffer, tranfer each character one by one until new line. Allocate memory continuesly to append each character. If new line is not reached, increase buffer size and set the index back to 0.
+
+##
