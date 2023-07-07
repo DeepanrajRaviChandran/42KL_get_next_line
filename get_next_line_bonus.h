@@ -6,7 +6,7 @@
 /*   By: dravi-ch <dravi-ch@student.42kl.edu.my>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/26 22:06:45 by dravi-ch          #+#    #+#             */
-/*   Updated: 2023/07/06 11:05:10 by dravi-ch         ###   ########.fr       */
+/*   Updated: 2023/07/07 10:47:33 by dravi-ch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@
 #  define BUFFER_SIZE 1024
 # endif
 
-# define MAX_FD 1000
+# define MAX_FD 1024
 
 typedef struct s_buf
 {

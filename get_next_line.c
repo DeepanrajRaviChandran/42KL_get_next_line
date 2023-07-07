@@ -6,13 +6,13 @@
 /*   By: dravi-ch <dravi-ch@student.42kl.edu.my>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/26 22:12:13 by dravi-ch          #+#    #+#             */
-/*   Updated: 2023/07/04 11:01:03 by dravi-ch         ###   ########.fr       */
+/*   Updated: 2023/07/07 10:59:26 by dravi-ch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-/*Reads Data into the buffer size from fd and initializes the */
+/*Reads Data into the buffer size from fd and initializes index to 0 */
 int	read_buffer(int fd, t_buf *buf)
 {
 	buf->size = read(fd, buf->buf, BUFFER_SIZE);
