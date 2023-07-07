@@ -6,7 +6,7 @@
 /*   By: dravi-ch <dravi-ch@student.42kl.edu.my>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/26 22:10:57 by dravi-ch          #+#    #+#             */
-/*   Updated: 2023/07/04 10:26:19 by dravi-ch         ###   ########.fr       */
+/*   Updated: 2023/07/07 13:06:12 by dravi-ch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,13 +15,12 @@
 /*Reallocate memory*/
 void	*ft_realloc(void *ptr, size_t size)
 {
-	void	*new_ptr;
 	char	*dest;
 	char	*src;
-	size_t	i;
+	int		i;
 
-	new_ptr = (char *)malloc(size + 1);
-	if (!size || !new_ptr)
+	dest = (char *)malloc(size + 1);
+	if (!size)
 	{
 		free (ptr);
 		return (NULL);
@@ -29,14 +28,10 @@ void	*ft_realloc(void *ptr, size_t size)
 	if (ptr)
 	{
 		src = (char *)ptr;
-		dest = (char *)new_ptr;
-		i = 0;
-		while (i < size)
-		{
+		i = -1;
+		while ((size_t)(++i) < size)
 			dest[i] = src[i];
-			i++;
-		}
 		free(ptr);
 	}
-	return (new_ptr);
+	return ((void *)dest);
 }

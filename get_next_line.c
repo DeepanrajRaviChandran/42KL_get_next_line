@@ -6,7 +6,7 @@
 /*   By: dravi-ch <dravi-ch@student.42kl.edu.my>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/26 22:12:13 by dravi-ch          #+#    #+#             */
-/*   Updated: 2023/07/07 10:59:26 by dravi-ch         ###   ########.fr       */
+/*   Updated: 2023/07/07 13:08:55 by dravi-ch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -107,6 +107,7 @@ int main()
 		line = get_next_line(fd);
 		i++;
 	}
+	system("leaks a.out");
 	close(fd);
 	return (0);
 }
