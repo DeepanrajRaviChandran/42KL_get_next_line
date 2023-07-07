@@ -6,109 +6,84 @@
 /*   By: dravi-ch <dravi-ch@student.42kl.edu.my>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/26 22:12:13 by dravi-ch          #+#    #+#             */
-/*   Updated: 2023/07/07 13:08:55 by dravi-ch         ###   ########.fr       */
+/*   Updated: 2023/07/08 00:07:45 by dravi-ch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-/*Reads Data into the buffer size from fd and initializes index to 0 */
-int	read_buffer(int fd, t_buf *buf)
+void	*free_and_return(void *var, void *ret)
 {
-	buf->size = read(fd, buf->buf, BUFFER_SIZE);
-	buf->index = 0;
-	return (buf->size);
+	free(var);
+	return (ret);
 }
 
-/*Allocate memory for the new char and appends the new char*/
-int	append_line(char **line, int *line_index, char current_char)
+char	*get_current_line(char *str)
 {
+	int		i;
 	char	*new_line;
 
-	new_line = ft_realloc(*line, (*line_index + 1) * sizeof(char));
+	i = 0;
+	if (!str[i])
+		return (NULL);
+	while (str[i] && str[i] != '\n')
+		i++;
+	new_line = malloc(i + 2);
 	if (!new_line)
-	{
-		free (*line);
-		return (-1);
-	}
-	*line = new_line;
-	(*line)[(*line_index)++] = current_char;
-	return (0);
+		return (NULL);
+	ft_strlcpy(new_line, str, i + 2);
+	return (new_line);
 }
 
-/*Allocate memory for the \0 and appends the \0*/
-void	finalize_line(char **line, int line_index)
+char	*ft_strclean(char *static_buffer)
 {
-	char	*new_line;
+	char	*str;
+	int		i;
+	int		j;
 
-	new_line = ft_realloc(*line, (line_index + 1) * sizeof(char));
-	if (!new_line)
+	if (!static_buffer)
+		return (NULL);
+	i = 0;
+	while (static_buffer[i] && static_buffer[i] != '\n')
+		i++;
+	if (!static_buffer[i])
 	{
-		free (*line);
-		*line = NULL;
+		free(static_buffer);
+		return (NULL);
 	}
-	else
-	{
-		*line = new_line;
-		(*line)[line_index] = '\0';
-	}
+	str = malloc(sizeof(char) * (ft_strlen(static_buffer) - i + 1));
+	if (!str)
+		return (NULL);
+	i++;
+	j = 0;
+	while (static_buffer[i])
+		str[j++] = static_buffer[i++];
+	str[j] = '\0';
+	return (free_and_return(static_buffer, str));
 }
 
-/*Uses infinite loop to append a character from buffer into a line*/
 char	*get_next_line(int fd)
 {
-	static t_buf	buf = {0};
-	char			*line;
-	int				line_index;
-	char			current_char;
+	char		*ret;
+	static char	*static_buffer;
+	char		*buffer;
+	int			read_bytes;
 
-	line = NULL;
-	line_index = 0;
-	while (1)
-	{
-		if (buf.index >= buf.size)
-		{
-			if (read_buffer(fd, &buf) <= 0)
-				break ;
-		}
-		current_char = buf.buf[buf.index++];
-		if (append_line(&line, &line_index, current_char) != 0)
-			return (NULL);
-		if (current_char == '\n')
-			break ;
-	}
-	if (line == NULL || line_index == 0)
+	if (fd < 0 || BUFFER_SIZE <= 0)
+		return (0);
+	buffer = malloc((BUFFER_SIZE + 1));
+	if (!buffer)
 		return (NULL);
-	finalize_line(&line, line_index);
-	return (line);
-}
-/*
-#include <stdio.h>
-#include <fcntl.h>
-
-int main()
-{
-	int		fd;
-	int		i;
-	char	*line;
-
-	fd = open("test.txt", O_RDONLY);
-	if (fd == -1)
+	read_bytes = 1;
+	while (!ft_strchr(static_buffer, '\n') && read_bytes != 0)
 	{
-		perror("Failed to open file");
-		return (1);
+		read_bytes = read(fd, buffer, BUFFER_SIZE);
+		if (read_bytes == -1)
+			return (free_and_return(buffer, NULL));
+		buffer[read_bytes] = '\0';
+		static_buffer = ft_strjoin(static_buffer, buffer);
 	}
-	line = get_next_line(fd);
-	i = 1;
-	while (line != NULL)
-	{
-		printf("line %d : %s\n", i, line);
-		free(line);
-		line = get_next_line(fd);
-		i++;
-	}
-	system("leaks a.out");
-	close(fd);
-	return (0);
+	ret = get_current_line(static_buffer);
+	static_buffer = ft_strclean(static_buffer);
+	return (free_and_return(buffer, ret));
 }
-*/
