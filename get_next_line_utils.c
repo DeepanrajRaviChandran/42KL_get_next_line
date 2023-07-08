@@ -6,47 +6,56 @@
 /*   By: dravi-ch <dravi-ch@student.42kl.edu.my>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/26 22:10:57 by dravi-ch          #+#    #+#             */
-/*   Updated: 2023/07/07 23:26:40 by dravi-ch         ###   ########.fr       */
+/*   Updated: 2023/07/08 18:53:25 by dravi-ch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-size_t	ft_strlen(const char *s)
+/*Calculates the length of a string*/
+size_t	ft_strlen(char *s)
 {
 	size_t	i;
 
+	if (s == NULL)
+		return (0);
 	i = 0;
 	while (s[i] != '\0')
 		i++;
 	return (i);
 }
 
-char	*ft_strjoin(char const *s1, char const *s2)
+/*Concatenates two strings and returns the the combined string*/
+char	*ft_strjoin_mod(char *s1, char *s2)
 {
-	unsigned int	i;
-	unsigned int	j;
-	unsigned int	size;
-	char			*fin_str;
+	int		i;
+	int		lens1;
+	int		lens2;
+	int		size;
+	char	*fin_str;
 
-	if (!s1 || !s2)
-		return (NULL);
-	size = ft_strlen(s1) + ft_strlen(s2);
+	lens1 = ft_strlen(s1);
+	lens2 = ft_strlen(s2);
+	size = lens1 + lens2;
 	fin_str = (char *)malloc(sizeof(char) * (size + 1));
 	if (!fin_str)
+	{
+		free (fin_str);
 		return (NULL);
-	i = 0;
-	j = 0;
-	while (s1[i])
-		fin_str[j++] = s1[i++];
-	i = 0;
-	while (s2[i])
-		fin_str[j++] = s2[i++];
-	fin_str[j] = '\0';
+	}
+	i = -1;
+	while (++i < lens1)
+		fin_str[i] = s1[i];
+	i = -1;
+	while (++i < lens2)
+		fin_str[i + lens1] = s2[i];
+	fin_str[size] = '\0';
+	free (s1);
 	return (fin_str);
 }
 
-char	*ft_strchr(const char *s, int c)
+/*Searches for the first occurrence of a character in a string*/
+char	*ft_strchr(char *s, int c)
 {
 	if (s == NULL)
 		return (NULL);
@@ -61,13 +70,12 @@ char	*ft_strchr(const char *s, int c)
 	return (NULL);
 }
 
-size_t	ft_strlcpy(char *dest, const char *src, size_t size)
+/*Safely copies a src to a destination and returns length*/
+size_t	ft_strlcpy(char *dest, char *src, size_t size)
 {
 	size_t	i;
 	size_t	results;
 
-	if (dest == NULL || src == NULL)
-		return (0);
 	results = 0;
 	while (src[results])
 		results++;
@@ -82,4 +90,3 @@ size_t	ft_strlcpy(char *dest, const char *src, size_t size)
 	dest[i] = '\0';
 	return (results);
 }
-

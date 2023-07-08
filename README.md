@@ -51,30 +51,21 @@
 - count: The maximum number of bytes to read.
 - returns the number of bytes read if successful, 0 if the end of the file has been reached, or -1 if an error occurred. The actual data read is stored in the buffer parameter.
 
-## Idea
-- From the buffer, tranfer each character one by one until new line. Allocate memory continuesly to append each character. If new line is not reached, increase buffer size and set the index back to 0.
-
 ## Step by Step Mandotory
 1. Defines a default value for BUFFER_SIZE. The buffer size determines the maximum number of characters read from the file at a time.
-2. t_buf, represents a buffer variable.
-- buf: A character array used to store the read data.
-- index: An integer representing the current index in the buffer.
-- size: An integer representing the number of characters in the buffer.
-3. ft_realloc function is used to reallocate memory for a given pointer with a new size. Allocates memory of size size + 1 and then copies the data from the old memory block to the new one using a loop. It frees the old memory block and returns the new pointer.
-4. read_buffer function reads data from the file descriptor into the buf->buf array using the read function. It reads up to BUFFER_SIZE characters and returns the number of characters read. It also updates the buf->index to 0 and buf->size to the number of characters read. Read system call keeps an internal file position and every calling it multiple time will make it to read the next sets of character.
-5. append_line takes a double pointer to a string (line), a pointer to an integer (line_index), and a character (current_char). The function first reallocates memory for the line by calling ft_realloc with the new size of (*line_index + 1) * sizeof(char). If reallocation fails, it frees the old line and returns -1. If reallocation succeeds, it assigns the new memory block to *line and appends current_char at index *line_index. Finally, it increments *line_index and returns 0.
-6. finalize_line a double pointer to a string (line) and an integer (line_index). The function first reallocates memory for the line by calling ft_realloc with the new size of (line_index + 1) * sizeof(char). If reallocation fails, it frees the old line, sets *line to NULL, and returns. If reallocation succeeds, it assigns the new memory block to *line and adds a null terminator ('\0') at index line_index. This indicates the end of the string.
-7. The get_next_line takes a file descriptor (fd) and returns a dynamically allocated string representing the next line read from the file. The function uses a static t_buf struct called buf to store the buffer data. It also initializes line as a null pointer and line_index as 0.
-- The function enters an infinite loop using while (1).
-- Inside the loop, the function checks if the current index (buf.index) is equal to or greater than the size of the buffer (buf.size) to check if the buffer needs to be refilled with data from the file. If the read_buffer returns 0, that means it has reaches the EOF and if it return -1 there is an error and the loop breaks.
-- Function retrieves the current character from the buffer (buf.buf[buf.index++]) and stores it in current_char.
-- The function calls append_line to append current_char to the line string. If append_line returns a non-zero value, it means an error occurred, so the function returns NULL.
-- The function checks if current_char is a newline character ('\n'). If it is, it means a complete line has been read, so the loop breaks.
-- After the loop ends, the function checks if line is still a null pointer or if line_index is 0. If either condition is true, it means no line was read, so the function returns NULL.
-- If a line was read, the function calls finalize_line to add a null terminator ('\0') at the end of the line.
+2. ft_read_fd: Reads from a file descriptor fd into line_buffer until a newline character is encountered or the end of the file is reached. Reads data in chunks of BUFFER_SIZE, appends the read data to line_buffer using ft_strjoin_mod, and returns the number of bytes read. If an error occurs during the read operation, it returns -1.
+3. ft_get_line: Creates a new string new_line by copying characters from str until a newline character or the end of the string is encountered. It allocates memory for new_line and returns it
+4. Creates a new string str by copying characters from line_buffer after the newline character. It allocates memory for str and returns it. It also frees the memory allocated for line_buffer
+5. get_next_line:
+- It allocates memory for a buffer of size BUFFER_SIZE + 1 using malloc. This buffer will be used for reading data from the file descriptor. Plus 1 in size is for the NULL terminator
+- It calls the ft_read_fd function, passing the file descriptor fd, the address of line_buffer, and the buffer. The purpose of this function is to read data from fd and append it to line_buffer until a newline character is encountered or the end of the file is reached. It returns the number of bytes read. If an error occurs during the read operation, it returns -1.
+- The ft_get_line function, passing line_buffer. This function creates a new string line by copying characters from line_buffer until a newline character or the end of the string is encountered. It returns the newly created line.
+- updates line_buffer by calling the ft_strclean function, passing line_buffer. This function creates a new string str by copying characters from line_buffer after the newline character. It returns the newly created str. It also frees the memory allocated for line_buffer.
+- Finally, the code frees the memory allocated for the buffer and returns the line obtained from the file descriptor.
 
 ## Step by Step Bonus
-- A constant MAX_FD with a value of 1024 which represents the maximum number of file descriptors is defined.
-- t_buf struct now includes an additional field fd, which represents the file descriptor associated with the buffer.
-- The buf array in the t_buf struct is now an array of t_buf structs (t_buf buf[MAX_FD]). Each element in the array represents a separate buffer for a specific file descriptor.
-- The get_next_line function, instead of using a single static buffer (buf), an array of static buffers is used (buf[MAX_FD]). The specific buffer used for a given file descriptor is accessed using buf[fd]. Only 999 fd can be used at a time.
+- static char *line_buffer[MAX_FD]; introduces a new static array called line_buffer. It is an array of character pointers that stores the line buffers for multiple file descriptors.
+- The line bytes = ft_read_fd(fd, &line_buffer[fd], buffer); replaces the usage of the previous line_buffer variable with line_buffer[fd]. Now, instead of using a single line buffer for all file descriptors, each file descriptor fd has its own associated line buffer stored in the line_buffer array.
+- line = ft_get_line(line_buffer[fd]); is unchanged and retrieves the line from the appropriate line_buffer for the given file descriptor fd.
+- line_buffer[fd] = ft_strclean(line_buffer[fd]); updates the corresponding line buffer for fd by removing the processed line. The ft_strclean function is called on line_buffer[fd] to obtain the remaining part of the buffer after the processed line.
+-this modification allows the get_next_line function to handle multiple file descriptors simultaneously by maintaining separate line buffers for each file descriptor in the line_buffer array. This enables independent reading of lines from different file descriptors without interfering with each other.

@@ -6,22 +6,37 @@
 /*   By: dravi-ch <dravi-ch@student.42kl.edu.my>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/26 22:12:13 by dravi-ch          #+#    #+#             */
-/*   Updated: 2023/07/08 00:07:45 by dravi-ch         ###   ########.fr       */
+/*   Updated: 2023/07/08 19:41:15 by dravi-ch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-void	*free_and_return(void *var, void *ret)
+/*reads from the file descriptor and appends the read content to the static
+buffer until a newline character is encountered or
+the end of the file is reached.*/
+int	ft_read_fd(int fd, char **line_buffer, char *buffer)
 {
-	free(var);
-	return (ret);
+	int	bytes;
+
+	bytes = 1;
+	while (!ft_strchr(*line_buffer, '\n') && bytes != 0)
+	{
+		bytes = read(fd, buffer, BUFFER_SIZE);
+		if (bytes == -1)
+			return (-1);
+		buffer[bytes] = '\0';
+		*line_buffer = ft_strjoin_mod(*line_buffer, buffer);
+	}
+	return (bytes);
 }
 
-char	*get_current_line(char *str)
+/*Extracts the current line from a string until a
+newline character or the end of the string.*/
+char	*ft_get_line(char *str)
 {
-	int		i;
 	char	*new_line;
+	int		i;
 
 	i = 0;
 	if (!str[i])
@@ -35,55 +50,85 @@ char	*get_current_line(char *str)
 	return (new_line);
 }
 
-char	*ft_strclean(char *static_buffer)
+/*Cleans the static buffer by removing the current line
+and returns the remaining contents.*/
+char	*ft_strclean(char *line_buffer)
 {
 	char	*str;
 	int		i;
 	int		j;
 
-	if (!static_buffer)
+	if (!line_buffer)
 		return (NULL);
 	i = 0;
-	while (static_buffer[i] && static_buffer[i] != '\n')
+	while (line_buffer[i] && line_buffer[i] != '\n')
 		i++;
-	if (!static_buffer[i])
+	if (!line_buffer[i])
 	{
-		free(static_buffer);
+		free(line_buffer);
 		return (NULL);
 	}
-	str = malloc(sizeof(char) * (ft_strlen(static_buffer) - i + 1));
+	str = malloc(sizeof(char) * (ft_strlen(line_buffer) - i + 1));
 	if (!str)
 		return (NULL);
 	i++;
 	j = 0;
-	while (static_buffer[i])
-		str[j++] = static_buffer[i++];
+	while (line_buffer[i])
+		str[j++] = line_buffer[i++];
 	str[j] = '\0';
-	return (free_and_return(static_buffer, str));
+	free (line_buffer);
+	return (str);
 }
 
 char	*get_next_line(int fd)
 {
-	char		*ret;
-	static char	*static_buffer;
+	char		*line;
+	static char	*line_buffer;
 	char		*buffer;
-	int			read_bytes;
+	int			bytes;
 
 	if (fd < 0 || BUFFER_SIZE <= 0)
-		return (0);
+		return (NULL);
 	buffer = malloc((BUFFER_SIZE + 1));
 	if (!buffer)
 		return (NULL);
-	read_bytes = 1;
-	while (!ft_strchr(static_buffer, '\n') && read_bytes != 0)
+	bytes = ft_read_fd(fd, &line_buffer, buffer);
+	if (bytes == -1)
 	{
-		read_bytes = read(fd, buffer, BUFFER_SIZE);
-		if (read_bytes == -1)
-			return (free_and_return(buffer, NULL));
-		buffer[read_bytes] = '\0';
-		static_buffer = ft_strjoin(static_buffer, buffer);
+		free(buffer);
+		return (NULL);
 	}
-	ret = get_current_line(static_buffer);
-	static_buffer = ft_strclean(static_buffer);
-	return (free_and_return(buffer, ret));
+	line = ft_get_line(line_buffer);
+	line_buffer = ft_strclean(line_buffer);
+	free(buffer);
+	return (line);
 }
+/*
+#include <stdio.h>
+
+int main()
+{
+	int		fd;
+	int		i;
+	char	*line;
+
+	fd = open("test.txt", O_RDONLY);
+	if (fd == -1)
+	{
+		perror("Failed to open file");
+		return (1);
+	}
+	line = get_next_line(fd);
+	i = 1;
+	while (line != NULL)
+	{
+		printf("line %d : %s\n", i, line);
+		free(line);
+		line = get_next_line(fd);
+		i++;
+	}
+	system("leaks a.out");
+	close(fd);
+	return (0);
+}
+*/
